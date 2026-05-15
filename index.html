@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rust 学习之旅 — 从零基础到高深</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0D1117;
+  --bg-secondary: #161B22;
+  --bg-card: #1C2128;
+  --bg-elevated: #21262D;
+  --rust-orange: #E44D26;
+  --rust-orange-light: #F06543;
+  --rust-orange-dark: #B83A1A;
+  --text-primary: #E6EDF3;
+  --text-secondary: #8B949E;
+  --text-muted: #6E7681;
+  --border-default: #30363D;
+  --border-active: #E44D26;
+  --accent-green: #3FB950;
+  --accent-yellow: #D29922;
+  --accent-blue: #58A6FF;
+  --accent-purple: #BC8CFF;
+  --accent-pink: #DB61A2;
+  --accent-cyan: #39D2C0;
+  --shadow-glow: 0 0 30px rgba(228, 77, 38, 0.15);
+  --font-mono: 'Fira Code', 'Consolas', monospace;
+  --font-sans: 'Noto Sans SC', 'PingFang SC', sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:var(--font-sans);
+  background:var(--bg-primary);
+  color:var(--text-primary);
+  overflow-x:hidden;
+  line-height:1.7;
+}
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--bg-primary); }
+::-webkit-scrollbar-thumb { background:var(--border-default); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:var(--rust-orange); }
+
+.container { max-width:1280px; margin:0 auto; padding:0 2rem; }
+
+/* Nav */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  background:rgba(13,17,23,0.85); backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border-default);
+  padding:0.75rem 2rem;
+  display:flex; align-items:center; justify-content:space-between;
+  transition:all 0.3s ease;
+}
+nav .logo { display:flex; align-items:center; gap:0.6rem; font-family:var(--font-mono); font-weight:700; font-size:1.1rem; color:var(--text-primary); }
+nav .logo svg { width:28px; height:28px; }
+nav .nav-links { display:flex; gap:1.5rem; list-style:none; }
+nav .nav-links a {
+  color:var(--text-secondary); text-decoration:none;
+  font-size:0.875rem; font-family:var(--font-mono);
+  transition:color 0.2s; position:relative;
+}
+nav .nav-links a:hover, nav .nav-links a.active { color:var(--rust-orange); }
+nav .nav-links a::after {
+  content:''; position:absolute; bottom:-4px; left:0;
+  width:0; height:2px; background:var(--rust-orange);
+  transition:width 0.3s ease;
+}
+nav .nav-links a:hover::after, nav .nav-links a.active::after { width:100%; }
+
+/* Hero */
+#hero {
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden; padding-top:80px;
+}
+#hero .bg-grid {
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(48,54,61,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(48,54,61,0.3) 1px, transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse at center, black 30%, transparent 70%);
+}
+#hero .hero-content { position:relative; z-index:2; text-align:center; max-width:900px; }
+#hero .hero-badge {
+  display:inline-flex; align-items:center; gap:0.5rem;
+  background:rgba(228,77,38,0.12); border:1px solid rgba(228,77,38,0.3);
+  border-radius:50px; padding:0.4rem 1.2rem;
+  font-family:var(--font-mono); font-size:0.8rem; color:var(--rust-orange-light);
+  margin-bottom:2rem; animation:fadeInUp 0.8s ease;
+}
+#hero h1 {
+  font-family:var(--font-mono); font-size:clamp(2.5rem, 6vw, 5rem); font-weight:900;
+  background:linear-gradient(135deg, var(--rust-orange) 0%, var(--rust-orange-light) 30%, #FF8C69 60%, var(--accent-yellow) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  line-height:1.15; margin-bottom:1.5rem;
+  animation:fadeInUp 0.8s ease 0.15s both;
+}
+#hero .hero-subtitle {
+  font-size:1.15rem; color:var(--text-secondary); max-width:650px;
+  margin:0 auto 2.5rem; animation:fadeInUp 0.8s ease 0.3s both;
+  font-family:var(--font-mono);
+}
+#hero .hero-subtitle .cursor {
+  display:inline-block; width:10px; height:1.2em; background:var(--rust-orange);
+  vertical-align:text-bottom; animation:blink 1s step-end infinite;
+}
+#hero .hero-buttons { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; animation:fadeInUp 0.8s ease 0.45s both; }
+.btn {
+  display:inline-flex; align-items:center; gap:0.5rem;
+  padding:0.75rem 1.8rem; border-radius:8px;
+  font-family:var(--font-mono); font-size:0.9rem; font-weight:600;
+  text-decoration:none; cursor:pointer; border:none;
+  transition:all 0.25s ease; position:relative; overflow:hidden;
+}
+.btn-primary {
+  background:var(--rust-orange); color:#fff;
+  box-shadow:0 0 20px rgba(228,77,38,0.3);
+}
+.btn-primary:hover { background:var(--rust-orange-light); transform:translateY(-2px); box-shadow:0 0 30px rgba(228,77,38,0.5); }
+.btn-secondary {
+  background:transparent; color:var(--text-primary);
+  border:1px solid var(--border-default);
+}
+.btn-secondary:hover { border-color:var(--rust-orange); color:var(--rust-orange); transform:translateY(-2px); }
+
+/* Ferris */
+.ferris-container { position:relative; width:180px; height:180px; margin:0 auto 2rem; animation:fadeInUp 0.8s ease 0.1s both; }
+.ferris-container .ferris-svg { width:100%; height:100%; }
+.ferris-body { animation:ferrisFloat 4s ease-in-out infinite; }
+.ferris-claw-l { animation:ferrisWaveL 2.5s ease-in-out infinite; transform-origin:55px 100px; }
+.ferris-claw-r { animation:ferrisWaveR 2.5s ease-in-out 0.3s infinite; transform-origin:125px 100px; }
+.ferris-eye-l, .ferris-eye-r { animation:ferrisBlink 4s ease-in-out infinite; }
+
+/* Section */
+.section { padding:6rem 0; position:relative; }
+.section-header { text-align:center; margin-bottom:4rem; }
+.section-tag {
+  display:inline-block; font-family:var(--font-mono); font-size:0.75rem;
+  color:var(--rust-orange); letter-spacing:0.15em; text-transform:uppercase;
+  margin-bottom:0.75rem;
+}
+.section-title {
+  font-family:var(--font-mono); font-size:clamp(1.8rem, 3vw, 2.5rem);
+  font-weight:700; margin-bottom:1rem;
+}
+.section-desc { color:var(--text-secondary); max-width:600px; margin:0 auto; font-size:1rem; }
+
+/* Roadmap */
+#roadmap { background:var(--bg-secondary); }
+.roadmap-svg-container { max-width:1100px; margin:0 auto; overflow-x:auto; padding:1rem 0; }
+.roadmap-svg-container svg { min-width:900px; width:100%; }
+.roadmap-node { cursor:pointer; transition:all 0.3s ease; }
+.roadmap-node:hover .node-circle { fill:var(--rust-orange); stroke:var(--rust-orange-light); }
+.roadmap-node:hover .node-text { fill:var(--text-primary); }
+.roadmap-connector { stroke-dasharray:1000; stroke-dashoffset:1000; animation:drawLine 2s ease forwards; }
+.stage-detail { display:none; }
+.stage-detail.active { display:block; animation:fadeIn 0.5s ease; }
+.stage-detail-card {
+  background:var(--bg-card); border:1px solid var(--border-default);
+  border-radius:12px; padding:2rem; max-width:800px; margin:2rem auto 0;
+}
+.stage-detail-card h3 { font-family:var(--font-mono); font-size:1.4rem; margin-bottom:0.5rem; }
+.stage-detail-card .stage-concepts { display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:1rem; }
+.stage-detail-card .concept-tag {
+  padding:0.3rem 0.8rem; border-radius:6px;
+  font-family:var(--font-mono); font-size:0.8rem;
+  background:rgba(228,77,38,0.1); color:var(--rust-orange-light);
+  border:1px solid rgba(228,77,38,0.2);
+}
+
+/* Concepts */
+.concepts-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:1.5rem; }
+.concept-card {
+  background:var(--bg-card); border:1px solid var(--border-default);
+  border-radius:12px; padding:1.75rem; cursor:pointer;
+  transition:all 0.35s ease; position:relative; overflow:hidden;
+}
+.concept-card::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(228,77,38,0.08), transparent 50%);
+  opacity:0; transition:opacity 0.3s;
+}
+.concept-card:hover::before { opacity:1; }
+.concept-card:hover { border-color:var(--border-active); transform:translateY(-4px); box-shadow:var(--shadow-glow); }
+.concept-card .card-icon { width:64px; height:64px; margin-bottom:1rem; }
+.concept-card h3 { font-family:var(--font-mono); font-size:1.1rem; margin-bottom:0.5rem; }
+.concept-card p { color:var(--text-secondary); font-size:0.9rem; margin-bottom:0.75rem; line-height:1.6; }
+.concept-card .difficulty {
+  display:inline-block; padding:0.15rem 0.6rem; border-radius:4px;
+  font-family:var(--font-mono); font-size:0.7rem; font-weight:600;
+}
+.diff-beginner { background:rgba(63,185,80,0.15); color:var(--accent-green); }
+.diff-intermediate { background:rgba(210,153,34,0.15); color:var(--accent-yellow); }
+.diff-advanced { background:rgba(219,97,162,0.15); color:var(--accent-pink); }
+
+/* Code Demo */
+#code-demo { background:var(--bg-primary); }
+.code-demo-wrapper {
+  display:grid; grid-template-columns:1fr 1fr; gap:2rem;
+  align-items:start; max-width:1100px; margin:0 auto;
+}
+.code-editor {
+  background:var(--bg-secondary); border:1px solid var(--border-default);
+  border-radius:12px; overflow:hidden;
+}
+.code-editor .editor-header {
+  display:flex; align-items:center; gap:0.5rem;
+  padding:0.75rem 1rem; background:var(--bg-elevated);
+  border-bottom:1px solid var(--border-default);
+}
+.editor-dot { width:10px; height:10px; border-radius:50%; }
+.editor-dot:nth-child(1) { background:#FF5F56; }
+.editor-dot:nth-child(2) { background:#FFBD2E; }
+.editor-dot:nth-child(3) { background:#27C93F; }
+.editor-header span { font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted); margin-left:0.5rem; }
+.code-editor pre {
+  padding:1.5rem; margin:0; overflow-x:auto;
+  font-family:var(--font-mono); font-size:0.85rem; line-height:1.8;
+}
+.code-editor .kw { color:#FF7B72; }
+.code-editor .fn { color:#D2A8FF; }
+.code-editor .ty { color:#FFA657; }
+.code-editor .str { color:#A5D6FF; }
+.code-editor .cm { color:#8B949E; font-style:italic; }
+.code-editor .mac { color:#F0883E; }
+.code-editor .num { color:#79C0FF; }
+.code-editor .op { color:#FF7B72; }
+
+.memory-viz {
+  background:var(--bg-card); border:1px solid var(--border-default);
+  border-radius:12px; padding:1.5rem;
+}
+.memory-viz h4 { font-family:var(--font-mono); font-size:1rem; margin-bottom:1rem; color:var(--text-secondary); }
+.memory-viz svg { width:100%; }
+.demo-controls { display:flex; gap:0.75rem; margin-top:1.5rem; flex-wrap:wrap; }
+.demo-btn {
+  padding:0.5rem 1.2rem; border-radius:6px; border:1px solid var(--border-default);
+  background:var(--bg-elevated); color:var(--text-primary);
+  font-family:var(--font-mono); font-size:0.8rem; cursor:pointer;
+  transition:all 0.2s;
+}
+.demo-btn:hover, .demo-btn.active { border-color:var(--rust-orange); color:var(--rust-orange); background:rgba(228,77,38,0.08); }
+
+/* Resources */
+#resources { background:var(--bg-secondary); }
+.resources-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:1.5rem; }
+.resource-card {
+  background:var(--bg-card); border:1px solid var(--border-default);
+  border-radius:12px; padding:1.75rem; text-decoration:none; color:var(--text-primary);
+  transition:all 0.35s ease; display:flex; flex-direction:column; gap:0.75rem;
+}
+.resource-card:hover { border-color:var(--rust-orange); transform:translateY(-4px); box-shadow:var(--shadow-glow); }
+.resource-card .res-icon { width:40px; height:40px; }
+.resource-card h3 { font-family:var(--font-mono); font-size:1rem; }
+.resource-card p { color:var(--text-secondary); font-size:0.85rem; line-height:1.5; }
+.resource-card .res-type {
+  display:inline-block; padding:0.15rem 0.6rem; border-radius:4px;
+  font-family:var(--font-mono); font-size:0.65rem; align-self:flex-start;
+  background:rgba(228,77,38,0.1); color:var(--rust-orange-light);
+}
+
+/* Footer */
+footer {
+  text-align:center; padding:3rem 2rem;
+  border-top:1px solid var(--border-default);
+  color:var(--text-muted); font-size:0.85rem;
+}
+footer .ferris-small { width:48px; height:48px; margin:0 auto 1rem; opacity:0.5; }
+
+/* Modal */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200;
+  display:flex; align-items:center; justify-content:center;
+  backdrop-filter:blur(4px); animation:fadeIn 0.3s ease;
+}
+.modal-content {
+  background:var(--bg-card); border:1px solid var(--border-default);
+  border-radius:16px; padding:2.5rem; max-width:700px; width:90%; max-height:85vh;
+  overflow-y:auto; position:relative; animation:modalIn 0.4s ease;
+}
+.modal-close {
+  position:absolute; top:1rem; right:1rem;
+  background:none; border:none; color:var(--text-muted);
+  font-size:1.5rem; cursor:pointer; width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:8px; transition:all 0.2s;
+}
+.modal-close:hover { background:var(--bg-elevated); color:var(--text-primary); }
+.modal-content h2 { font-family:var(--font-mono); font-size:1.5rem; margin-bottom:0.5rem; }
+.modal-content .modal-difficulty { margin-bottom:1rem; }
+.modal-content .modal-svg { width:100%; max-height:250px; margin:1rem 0; display:flex; justify-content:center; }
+.modal-content pre {
+  background:var(--bg-primary); border-radius:8px; padding:1.25rem;
+  overflow-x:auto; font-family:var(--font-mono); font-size:0.82rem; line-height:1.7;
+  margin:1rem 0;
+}
+.modal-content .explanation { color:var(--text-secondary); font-size:0.95rem; line-height:1.7; }
+
+/* Progress Bar */
+.progress-bar-container {
+  position:fixed; top:0; left:0; right:0; height:3px; z-index:101;
+  background:transparent;
+}
+.progress-bar-fill {
+  height:100%; background:linear-gradient(90deg, var(--rust-orange), var(--rust-orange-light));
+  width:0%; transition:width 0.1s linear;
+}
+
+/* Animations */
+@keyframes fadeInUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+@keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
+@keyframes ferrisFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
+@keyframes ferrisWaveL { 0%,100% { transform:rotate(0deg); } 30% { transform:rotate(-15deg); } 60% { transform:rotate(8deg); } }
+@keyframes ferrisWaveR { 0%,100% { transform:rotate(0deg); } 30% { transform:rotate(15deg); } 60% { transform:rotate(-8deg); } }
+@keyframes ferrisBlink { 0%,95%,100% { transform:scaleY(1); } 97% { transform:scaleY(0.1); } }
+@keyframes drawLine { to { stroke-dashoffset:0; } }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes slideRight { from { transform:translateX(0); } to { transform:translateX(120px); } }
+@keyframes slideLeft { from { transform:translateX(0); } to { transform:translateX(-120px); } }
+@keyframes fadeOutIn { 0%,100% { opacity:0.3; } 50% { opacity:1; } }
+@keyframes growWidth { from { width:0; } to { width:100%; } }
+@keyframes dotPulse { 0%,100% { r:4; opacity:0.5; } 50% { r:6; opacity:1; } }
+@keyframes arrowFlow { to { stroke-dashoffset:-40; } }
+
+.reveal { opacity:0; transform:translateY(40px); transition:all 0.7s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+@media (max-width:1024px) {
+  .concepts-grid { grid-template-columns:repeat(2, 1fr); }
+  .resources-grid { grid-template-columns:repeat(2, 1fr); }
+  .code-demo-wrapper { grid-template-columns:1fr; }
+}
+@media (max-width:768px) {
+  nav .nav-links { display:none; }
+  .concepts-grid { grid-template-columns:1fr; }
+  .resources-grid { grid-template-columns:1fr; }
+  #hero h1 { font-size:2rem; }
+  .section { padding:4rem 0; }
+  .container { padding:0 1.25rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar-container"><div class="progress-bar-fill" id="progressBar"></div></div>
+
+<nav id="navbar">
+  <div class="logo">
+    <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#E44D26"/><text x="16" y="22" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff" font-family="sans-serif">R</text></svg>
+    <span>Rust 学习之旅</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#hero" class="active">首页</a></li>
+    <li><a href="#roadmap">路线图</a></li>
+    <li><a href="#concepts">核心概念</a></li>
+    <li><a href="#code-demo">代码演示</a></li>
+    <li><a href="#resources">资源</a></li>
+  </ul>
+</nav>
+
+<section id="hero">
+  <div class="bg-grid"></div>
+  <div class="hero-content">
+    <div class="ferris-container">
+      <svg class="ferris-svg" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+        <g class="ferris-body">
+          <ellipse cx="90" cy="100" rx="52" ry="38" fill="#E44D26"/>
+          <ellipse cx="90" cy="95" rx="48" ry="34" fill="#F06543"/>
+          <ellipse cx="90" cy="85" rx="36" ry="24" fill="#FF8C69"/>
+          <circle cx="75" cy="78" r="7" fill="#fff"/>
+          <circle cx="105" cy="78" r="7" fill="#fff"/>
+          <circle class="ferris-eye-l" cx="75" cy="78" r="4" fill="#0D1117"/>
+          <circle class="ferris-eye-r" cx="105" cy="78" r="4" fill="#0D1117"/>
+          <ellipse cx="90" cy="93" rx="8" ry="5" fill="#E44D26"/>
+          <path d="M82 98 Q90 108 98 98" stroke="#B83A1A" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <g class="ferris-claw-l">
+            <path d="M40 90 L25 75 L18 78" stroke="#E44D26" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M40 95 L22 95 L15 92" stroke="#E44D26" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <g class="ferris-claw-r">
+            <path d="M140 90 L155 75 L162 78" stroke="#E44D26" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M140 95 L158 95 L165 92" stroke="#E44D26" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <circle cx="52" cy="60" r="6" fill="#E44D26" opacity="0.6"/>
+          <circle cx="128" cy="60" r="6" fill="#E44D26" opacity="0.6"/>
+        </g>
+        <text x="90" y="155" text-anchor="middle" font-family="monospace" font-size="10" fill="#8B949E">Ferris</text>
+      </svg>
+    </div>
+    <div class="hero-badge">
+      <span>&#9670;</span> Rust 学习之旅 v1.0
+    </div>
+    <h1>掌握 Rust 编程语言</h1>
+    <p class="hero-subtitle">
+      <span id="typewriter"></span><span class="cursor"></span>
+    </p>
+    <div class="hero-buttons">
+      <a href="#roadmap" class="btn btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        开始学习之旅
+      </a>
+      <a href="#concepts" class="btn btn-secondary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/></svg>
+        浏览核心概念
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="roadmap" class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">Learning Path</div>
+      <h2 class="section-title">从零基础到高深</h2>
+      <p class="section-desc">7 大学习阶段，逐步掌握 Rust 语言的核心概念和高级特性</p>
+    </div>
+    <div class="roadmap-svg-container reveal">
+      <svg viewBox="0 0 1100 260" id="roadmapSvg">
+        <defs>
+          <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#E44D26"/>
+            <stop offset="100%" stop-color="#F06543"/>
+          </linearGradient>
+          <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <path class="roadmap-connector" d="M60 130 L1040 130" stroke="url(#lineGrad)" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path class="roadmap-connector" d="M60 130 L1040 130" stroke="url(#lineGrad)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.2" style="animation-delay:0.3s"/>
+        <g class="roadmap-node" data-stage="1" onclick="showStage(1)">
+          <circle class="node-circle" cx="80" cy="130" r="24" fill="#1C2128" stroke="#E44D26" stroke-width="2.5" filter="url(#glow)"/>
+          <text class="node-text" x="80" y="136" text-anchor="middle" fill="#E6EDF3" font-family="monospace" font-size="14" font-weight="bold">01</text>
+          <text x="80" y="175" text-anchor="middle" fill="#8B949E" font-family="sans-serif" font-size="11">基础入门</text>
+        </g>
+        <g class="roadmap-node" data-stage="2" onclick="showStage(2)">
+          <circle class="node-circle" cx="240" cy="130" r="24" fill="#1C2128" stroke="#E44D26" stroke-width="2.5"/>
+          <text class="node-text" x="240" y="136" text-anchor="middle" fill="#E6EDF3" font-family="monospace" font-size="14" font-weight="bold">02</text>
+          <text x="240" y="175" text-anchor="middle" fill="#8B949E" font-family="sans-serif" font-size="11">所有权系统</text>
+        </g>
+        <g class="roadmap-node" data-stage="3" onclick="showStage(3)">
+          <circle class="node-circle" cx="400" cy="130" r="24" fill="#1C2128" stroke="#E44D26" stroke-width="2.5"/>
+          <text class="node-text" x="400" y="136" text-anchor="middle" fill="#E6EDF3" font-family="monospace" font-size="14" font-weight="bold">03</text>
+          <text x="400" y="175" text-anchor="middle" fill="#8B949E" font-family="sans-serif" font-size="11">引用与借用</text>
+        </g>
+        <g class="roadmap-node" data-stage="4" onclick="showStage(4)">
+          <circle class="node-circle" cx="560" cy="130" r="24" fill="#1C2128" stroke="#E44D26" stroke-width="2.5"/>
+          <text class="node-text" x="560" y="136" text-anchor="middle" fill="#E6EDF3" font-family="monospace" font-size="14" font-weight="bold">04</text>
+          <text x="560" y="175" text-anchor="middle" fill="#8B949E" font-family="sans-serif" font-size="11">结构体与枚举</text>
+        </g>
+        <g class="roadmap-node" data-stage="5" onclick="showStage(5)">
+          <circle class="node-circle" cx="720" cy="130" r="24" fill="#1C2128" stroke="#E44D26" stroke-width="2.5"/>
+          <text class="node-text" x="720" y="136" text-anchor="middle" fill="#E6EDF3" font-family="monospace" font-size="14" font-weight="bold">05</text>
+          <text x="720" y="175" text-anchor="middle" fill="#8B949E" font-family="sans-serif" font-size="11">泛型与 Trait</text>
+        </g>
+        <g class="roadmap-node" data-stage="6" onclick="showStage(6)">
+          <circle class="node-circle" cx="880" cy="130" r="24" fill="#1C2128" stroke="#E44D26" stroke-width="2.5"/>
+          <text class="node-text" x="880" y="136" text-anchor="middle" fill="#E6EDF3" font-family="monospace" font-size="14" font-weight="bold">06</text>
+          <text x="880" y="175" text-anchor="middle" fill="#8B949E" font-family="sans-serif" font-size="11">生命周期</text>
+        </g>
+        <g class="roadmap-node" data-stage="7" onclick="showStage(7)">
+          <circle class="node-circle" cx="1040" cy="130" r="24" fill="#1C2128" stroke="#E44D26" stroke-width="2.5"/>
+          <text class="node-text" x="1040" y="136" text-anchor="middle" fill="#E6EDF3" font-family="monospace" font-size="14" font-weight="bold">07</text>
+          <text x="1040" y="175" text-anchor="middle" fill="#8B949E" font-family="sans-serif" font-size="11">高级特性</text>
+        </g>
+      </svg>
+    </div>
+    <div id="stageDetail" class="stage-detail active" style="display:block;">
+      <div class="stage-detail-card">
+        <h3>阶段 1：基础入门</h3>
+        <p style="color:var(--text-secondary);">Rust 语言的基础语法，包括变量绑定、数据类型、函数定义和控制流。</p>
+        <div class="stage-concepts">
+          <span class="concept-tag">变量与可变性</span><span class="concept-tag">标量类型</span>
+          <span class="concept-tag">复合类型</span><span class="concept-tag">函数</span>
+          <span class="concept-tag">if/else</span><span class="concept-tag">loop/while/for</span>
+          <span class="concept-tag">表达式 vs 语句</span><span class="concept-tag">注释</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="concepts" class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">Core Concepts</div>
+      <h2 class="section-title">核心概念可视化</h2>
+      <p class="section-desc">每个 Rust 核心概念都配有专属 SVG 动画，点击卡片查看详细演示和代码示例</p>
+    </div>
+    <div class="concepts-grid" id="conceptsGrid"></div>
+  </div>
+</section>
+
+<section id="code-demo" class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">Live Demo</div>
+      <h2 class="section-title">交互式代码演示</h2>
+      <p class="section-desc">选择不同概念，观察 Rust 代码执行过程的内存变化</p>
+    </div>
+    <div class="code-demo-wrapper reveal">
+      <div class="code-editor" id="codeEditor">
+        <div class="editor-header">
+          <span class="editor-dot"></span><span class="editor-dot"></span><span class="editor-dot"></span>
+          <span>main.rs</span>
+        </div>
+        <pre id="codeContent"></pre>
+      </div>
+      <div class="memory-viz">
+        <h4>内存可视化</h4>
+        <svg id="memoryViz" viewBox="0 0 400 300"></svg>
+        <div class="demo-controls" id="demoControls"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="resources" class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">References</div>
+      <h2 class="section-title">学习资源与参考</h2>
+      <p class="section-desc">官方手册、经典书籍和 GitHub 开源仓库推荐</p>
+    </div>
+    <div class="resources-grid reveal" id="resourcesGrid"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="ferris-small">
+    <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#E44D26" opacity="0.3"/><text x="24" y="30" text-anchor="middle" font-size="16" fill="#E44D26" font-family="sans-serif" font-weight="bold">R</text></svg>
+  </div>
+  <p>Rust 学习之旅 &copy; 2026 — 参考 Rust 官方手册 | The Rust Programming Language | Rust By Example</p>
+  <p style="margin-top:0.5rem;font-family:var(--font-mono);font-size:0.75rem;">fn main() { println!("Keep learning Rust!"); }</p>
+</footer>
+
+<div class="modal-overlay" id="modal" style="display:none;" onclick="closeModal(event)">
+  <div class="modal-content" id="modalContent" onclick="event.stopPropagation()"></div>
+</div>
+
+<script>
+const stages = [
+  {
+    id:1, title:'基础入门', subtitle:'变量、类型、函数、控制流',
+    concepts:['变量与可变性','标量类型','复合类型','函数定义','if/else 控制流','循环','表达式与语句','注释与文档'],
+    color:'#E44D26'
+  },
+  {
+    id:2, title:'所有权系统', subtitle:'Rust 最独特的核心机制',
+    concepts:['所有权规则','移动语义','克隆与复制','Copy Trait','栈与堆','String 与 &str','所有权与函数','返回值与作用域'],
+    color:'#F06543'
+  },
+  {
+    id:3, title:'引用与借用', subtitle:'在不转移所有权的情况下使用数据',
+    concepts:['不可变引用','可变引用','借用规则','悬垂引用','引用的作用域','切片类型','字符串切片','数组切片'],
+    color:'#FF8C69'
+  },
+  {
+    id:4, title:'结构体与枚举', subtitle:'自定义数据类型与模式匹配',
+    concepts:['定义结构体','结构体方法','枚举定义','Option 枚举','Result 枚举','match 匹配','if let 语法','方法语法'],
+    color:'#D29922'
+  },
+  {
+    id:5, title:'泛型与 Trait', subtitle:'代码复用与抽象',
+    concepts:['泛型函数','泛型结构体','Trait 定义','Trait 实现','特征对象','Trait Bound','派生宏','关联类型'],
+    color:'#58A6FF'
+  },
+  {
+    id:6, title:'生命周期', subtitle:'编译器如何保证引用有效',
+    concepts:['生命周期标注','生命周期省略','结构体生命周期','静态生命周期','生命周期约束','函数签名','生命周期子类型','NLL'],
+    color:'#BC8CFF'
+  },
+  {
+    id:7, title:'高级特性', subtitle:'并发、异步、宏与 Unsafe',
+    concepts:['线程创建','消息传递','共享状态','Send/Sync','async/await','宏定义','Unsafe Rust','FFI 接口'],
+    color:'#DB61A2'
+  }
+];
+
+const concepts = [
+  {
+    id:'ownership', name:'所有权 (Ownership)', difficulty:'intermediate',
+    desc:'Rust 最核心的特性。每个值有且只有一个所有者，当所有者离开作用域，值被自动释放。',
+    svgType:'ownership', code:`// 所有权转移示例\nlet s1 = String::from("hello");\nlet s2 = s1; // s1 的所有权移动到 s2\n// println!("{}", s1); // 编译错误！s1 已失效\nprintln!("{}", s2); // 正常工作`,
+    explanation:'在 Rust 中，每个值都有一个所有者变量。当将值赋给另一个变量时，所有权发生转移（移动语义），原变量将不再有效。这种机制避免了双重释放（double free）的问题，是 Rust 内存安全的基础。'
+  },
+  {
+    id:'borrowing', name:'借用 (Borrowing)', difficulty:'intermediate',
+    desc:'通过引用临时访问数据而不获取所有权，分为不可变借用（&T）和可变借用（&mut T）。',
+    svgType:'borrowing', code:`// 借用示例\nlet s1 = String::from("hello");\nlet len = calculate_length(&s1);\n// s1 仍然可用，因为只是借出\nprintln!("{} 的长度是 {}", s1, len);\n\nfn calculate_length(s: &String) -> usize {\n    s.len()\n}`,
+    explanation:'借用允许你在不转移所有权的情况下使用数据。不可变借用（&T）可以有多个同时存在，可变借用（&mut T）同一时间只能有一个。这个规则在编译期防止了数据竞争。'
+  },
+  {
+    id:'lifetime', name:'生命周期 (Lifetime)', difficulty:'advanced',
+    desc:'编译器用来确保所有借用在其引用的数据有效期间内保持有效的机制。',
+    svgType:'lifetime', code:`// 生命周期标注\nfn longest<'a>(x: &'a str, y: &'a str) -> &'a str {\n    if x.len() > y.len() { x } else { y }\n}\n\nfn main() {\n    let s1 = String::from("short");\n    let s2 = String::from("longer string");\n    let result = longest(&s1, &s2);\n    println!("Longer: {}", result);\n}`,
+    explanation:'生命周期标注（\'a）告诉编译器多个引用之间的关系。它不会改变引用的实际存活时间，只是帮助编译器进行借用检查。Rust 的借用检查器确保没有任何引用会超过其引用数据的生命周期。'
+  },
+  {
+    id:'pattern', name:'模式匹配 (Pattern Match)', difficulty:'beginner',
+    desc:'match 表达式是 Rust 中强大的控制流运算符，可对枚举、数值、字符串等进行模式匹配。',
+    svgType:'pattern', code:`// match 模式匹配\nenum Coin { Penny, Nickel, Dime, Quarter }\n\nfn value_in_cents(coin: Coin) -> u8 {\n    match coin {\n        Coin::Penny => 1,\n        Coin::Nickel => 5,\n        Coin::Dime => 10,\n        Coin::Quarter => 25,\n    }\n}`,
+    explanation:'match 表达式会穷尽所有可能的分支，编译器会检查是否覆盖了所有情况。结合 Option 和 Result 枚举使用时，match 成为 Rust 错误处理和空值处理的核心工具。'
+  },
+  {
+    id:'generic', name:'泛型 (Generics)', difficulty:'intermediate',
+    desc:'泛型允许编写适用于多种类型的代码，减少代码重复，同时保持类型安全。',
+    svgType:'generic', code:`// 泛型函数\nfn largest<T: PartialOrd>(list: &[T]) -> &T {\n    let mut largest = &list[0];\n    for item in list {\n        if item > largest { largest = item; }\n    }\n    largest\n}`,
+    explanation:'泛型通过类型参数实现代码复用。Rust 的泛型在编译时进行单态化（monomorphization），为每个使用的具体类型生成专用代码，因此运行时没有性能损失。'
+  },
+  {
+    id:'concurrency', name:'并发编程 (Concurrency)', difficulty:'advanced',
+    desc:'Rust 的类型系统和所有权模型使得并发编程更安全，编译期即可防止数据竞争。',
+    svgType:'concurrency', code:`// 使用线程和消息传递\nuse std::thread;\nuse std::sync::mpsc;\n\nlet (tx, rx) = mpsc::channel();\nthread::spawn(move || {\n    tx.send("来自线程的消息").unwrap();\n});\nlet received = rx.recv().unwrap();\nprintln!("Got: {}", received);`,
+    explanation:'Rust 标准库提供了线程（std::thread）、消息传递通道（mpsc）、互斥锁（Mutex）和原子类型。通过 Send 和 Sync trait，编译器在编译时就能检测到潜在的并发问题。'
+  },
+  {
+    id:'trait', name:'Trait（特征）', difficulty:'intermediate',
+    desc:'Trait 定义了类型之间共享的行为接口，类似于其他语言中的接口（interface），但更强大。',
+    svgType:'trait', code:`// Trait 定义与实现\ntrait Summary {\n    fn summarize(&self) -> String;\n}\n\nstruct Article { title: String, body: String }\n\nimpl Summary for Article {\n    fn summarize(&self) -> String {\n        format!("{}...", &self.body[..50])\n    }\n}`,
+    explanation:'Trait 是 Rust 实现多态的核心机制。通过 impl Trait for Type 语法为类型实现特征。特征约束（Trait Bound）可以在泛型中限制类型参数必须实现某些特征。'
+  },
+  {
+    id:'macro', name:'宏 (Macros)', difficulty:'advanced',
+    desc:'宏允许编写生成代码的代码，在编译时展开，实现元编程。分为声明宏和过程宏。',
+    svgType:'macro', code:`// 声明宏示例\nmacro_rules! vec {\n    ( $( $x:expr ),* ) => {\n        {\n            let mut temp = Vec::new();\n            $( temp.push($x); )*\n            temp\n        }\n    };\n}\n\nlet v = vec![1, 2, 3, 4];`,
+    explanation:'声明宏（macro_rules!）通过模式匹配生成代码。过程宏（Procedural Macros）更加灵活，可以操作 TokenStream。常用的 println!、vec! 等都是通过宏实现的。'
+  },
+  {
+    id:'async', name:'异步编程 (Async)', difficulty:'advanced',
+    desc:'Rust 的异步编程基于 Future trait 和 async/await 语法，提供零成本抽象的并发模型。',
+    svgType:'async', code:`// async/await 示例\nuse tokio;\n\n#[tokio::main]\nasync fn main() {\n    let result = fetch_data().await;\n    println!("{}", result);\n}\n\nasync fn fetch_data() -> String {\n    "获取的数据".to_string()\n}`,
+    explanation:'Rust 的 async/await 提供了一种编写异步代码的直观方式。与运行时的配合（如 Tokio），可以实现高性能的网络服务。async fn 返回实现了 Future trait 的类型。'
+  }
+];
+
+const resources = [
+  {name:'The Rust Book', url:'https://doc.rust-lang.org/book/', desc:'Rust 官方入门书籍，最权威的学习资料，涵盖所有核心概念。', type:'official', icon:'book'},
+  {name:'Rust By Example', url:'https://doc.rust-lang.org/rust-by-example/', desc:'通过可运行的实例学习 Rust，每个概念都有配套代码。', type:'official', icon:'code'},
+  {name:'Rust 参考手册', url:'https://doc.rust-lang.org/reference/', desc:'Rust 语言的完整参考文档，包含语法和语义的精确描述。', type:'official', icon:'ref'},
+  {name:'Rustlings', url:'https://github.com/rust-lang/rustlings', desc:'小型练习项目，通过修复编译错误来学习 Rust。', type:'github', icon:'github'},
+  {name:'Comprehensive Rust', url:'https://github.com/google/comprehensive-rust', desc:'Google 开源的 Rust 培训课程，4 天完整教程。', type:'github', icon:'github'},
+  {name:'Rust 标准库文档', url:'https://doc.rust-lang.org/std/', desc:'标准库 API 文档，日常开发必备参考。', type:'official', icon:'std'},
+  {name:'Cargo 手册', url:'https://doc.rust-lang.org/cargo/', desc:'Rust 包管理器和构建系统 Cargo 的完整指南。', type:'official', icon:'cargo'},
+  {name:'Rust 设计模式', url:'https://github.com/rust-unofficial/patterns', desc:'Rust 社区维护的设计模式和最佳实践集合。', type:'github', icon:'github'}
+];
+
+const resourceIcons = {
+  book:'<svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="rgba(88,166,255,0.15)"/><path d="M12 10h12l4 4v16a2 2 0 01-2 2H12a2 2 0 01-2-2V12a2 2 0 012-2z" stroke="#58A6FF" stroke-width="1.5" fill="none"/><line x1="16" y1="18" x2="26" y2="18" stroke="#58A6FF" stroke-width="1.5"/><line x1="16" y1="22" x2="24" y2="22" stroke="#58A6FF" stroke-width="1.5"/></svg>',
+  code:'<svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="rgba(63,185,80,0.15)"/><polyline points="14,16 10,20 14,24" stroke="#3FB950" stroke-width="1.5" fill="none"/><polyline points="26,16 30,20 26,24" stroke="#3FB950" stroke-width="1.5" fill="none"/><line x1="18" y1="15" x2="22" y2="25" stroke="#3FB950" stroke-width="1.5"/></svg>',
+  ref:'<svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="rgba(188,140,255,0.15)"/><rect x="12" y="8" width="16" height="24" rx="2" stroke="#BC8CFF" stroke-width="1.5" fill="none"/><line x1="16" y1="14" x2="24" y2="14" stroke="#BC8CFF" stroke-width="1.5"/><line x1="16" y1="18" x2="24" y2="18" stroke="#BC8CFF" stroke-width="1.5"/><line x1="16" y1="22" x2="22" y2="22" stroke="#BC8CFF" stroke-width="1.5"/></svg>',
+  github:'<svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="rgba(228,77,38,0.15)"/><path d="M20 8a12 12 0 00-3.8 23.4c.6.1.8-.26.8-.58v-2.04c-3.34.72-4.04-1.6-4.04-1.6-.54-1.38-1.34-1.75-1.34-1.75-1.1-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.08 1.84 2.82 1.3 3.5 1 .1-.78.42-1.3.76-1.6-2.66-.3-5.46-1.34-5.46-5.94 0-1.3.46-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.24a11.5 11.5 0 016 0c2.3-1.56 3.3-1.24 3.3-1.24.64 1.66.24 2.88.12 3.18.76.84 1.24 1.92 1.24 3.22 0 4.62-2.8 5.64-5.48 5.94.44.38.82 1.12.82 2.26v3.34c0 .32.2.7.82.58A12 12 0 0020 8z" fill="#E44D26"/></svg>',
+  std:'<svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="rgba(57,210,192,0.15)"/><circle cx="20" cy="20" r="10" stroke="#39D2C0" stroke-width="1.5" fill="none"/><circle cx="20" cy="20" r="4" fill="#39D2C0"/></svg>',
+  cargo:'<svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="rgba(210,153,34,0.15)"/><rect x="10" y="14" width="20" height="16" rx="2" stroke="#D29922" stroke-width="1.5" fill="none"/><line x1="14" y1="10" x2="14" y2="14" stroke="#D29922" stroke-width="1.5"/><line x1="20" y1="8" x2="20" y2="14" stroke="#D29922" stroke-width="1.5"/><line x1="26" y1="10" x2="26" y2="14" stroke="#D29922" stroke-width="1.5"/></svg>'
+};
+
+function getConceptSVG(svgType) {
+  switch(svgType) {
+    case 'ownership':
+      return `<svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+        <defs><marker id="arrowOw" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#E44D26"/></marker></defs>
+        <rect x="30" y="40" width="80" height="45" rx="6" fill="#1C2128" stroke="#E44D26" stroke-width="2"/>
+        <text x="70" y="58" text-anchor="middle" fill="#FF8C69" font-family="monospace" font-size="11">s1</text>
+        <text x="70" y="74" text-anchor="middle" fill="#E6EDF3" font-family="monospace" font-size="10">"hello"</text>
+        <rect x="200" y="40" width="80" height="45" rx="6" fill="#1C2128" stroke="#58A6FF" stroke-width="2"/>
+        <text x="240" y="58" text-anchor="middle" fill="#58A6FF" font-family="monospace" font-size="11">s2</text>
+        <text x="240" y="74" text-anchor="middle" fill="#E6EDF3" font-family="monospace" font-size="10">"hello"</text>
+        <line x1="110" y1="62" x2="192" y2="62" stroke="#E44D26" stroke-width="2" marker-end="url(#arrowOw)" stroke-dasharray="6 3">
+          <animate attributeName="stroke-dashoffset" from="100" to="0" dur="2s" repeatCount="indefinite"/>
+        </line>
+        <text x="70" y="105" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="9">❌ 已失效</text>
+        <text x="240" y="105" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="9">✅ 当前所有者</text>
+        <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite" xlink:href="#fadeText"/>
+        <rect id="fadeText" x="200" y="40" width="80" height="45" rx="6" fill="none" stroke="#3FB950" stroke-width="2" opacity="0">
+          <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+        </rect>
+      </svg>`;
+    case 'borrowing':
+      return `<svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+        <defs><marker id="arrowBr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#58A6FF"/></marker></defs>
+        <rect x="30" y="40" width="80" height="45" rx="6" fill="#1C2128" stroke="#E44D26" stroke-width="2"/>
+        <text x="70" y="58" text-anchor="middle" fill="#FF8C69" font-family="monospace" font-size="11">s1</text>
+        <text x="70" y="74" text-anchor="middle" fill="#E6EDF3" font-family="monospace" font-size="10">"hello"</text>
+        <rect x="200" y="25" width="80" height="35" rx="6" fill="rgba(88,166,255,0.1)" stroke="#58A6FF" stroke-width="1.5" stroke-dasharray="4 2"/>
+        <text x="240" y="46" text-anchor="middle" fill="#58A6FF" font-family="monospace" font-size="10">&s1</text>
+        <line x1="240" y1="60" x2="160" y2="75" stroke="#58A6FF" stroke-width="1.5" marker-end="url(#arrowBr)" stroke-dasharray="4 3">
+          <animate attributeName="stroke-dashoffset" from="50" to="0" dur="1.5s" repeatCount="indefinite"/>
+        </line>
+        <text x="70" y="105" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="9">✅ 仍然有效</text>
+        <text x="240" y="80" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="9">📖 只读引用</text>
+      </svg>`;
+    case 'lifetime':
+      return `<svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+        <line x1="40" y1="60" x2="280" y2="60" stroke="#30363D" stroke-width="1"/>
+        <line x1="40" y1="90" x2="280" y2="90" stroke="#30363D" stroke-width="1"/>
+        <line x1="60" y1="50" x2="60" y2="100" stroke="#E44D26" stroke-width="4" stroke-linecap="round">
+          <animate attributeName="x1" values="60;160;60" dur="3s" repeatCount="indefinite"/>
+          <animate attributeName="x2" values="60;160;60" dur="3s" repeatCount="indefinite"/>
+        </line>
+        <circle cx="60" cy="60" r="5" fill="#E44D26"><animate attributeName="cx" values="60;160;60" dur="3s" repeatCount="indefinite"/></circle>
+        <text x="60" y="50" text-anchor="middle" fill="#E44D26" font-family="monospace" font-size="10">x</text>
+        <line x1="120" y1="80" x2="200" y2="80" stroke="#58A6FF" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="120" cy="90" r="4" fill="#58A6FF"/><text x="120" y="105" text-anchor="middle" fill="#58A6FF" font-family="monospace" font-size="9">r=&x</text>
+        <text x="200" y="105" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="9">r 有效范围</text>
+        <text x="160" y="30" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="9">生命周期 'a</text>
+      </svg>`;
+    case 'pattern':
+      return `<svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="20" width="60" height="40" rx="6" fill="#1C2128" stroke="#E44D26" stroke-width="1.5"/>
+        <text x="50" y="44" text-anchor="middle" fill="#E6EDF3" font-family="monospace" font-size="11">Coin</text>
+        <line x1="80" y1="30" x2="130" y2="30" stroke="#E44D26" stroke-width="1.5" marker-end="url(#arrowBr)"/>
+        <rect x="130" y="15" width="70" height="30" rx="4" fill="rgba(63,185,80,0.1)" stroke="#3FB950" stroke-width="1"/><text x="165" y="35" text-anchor="middle" fill="#3FB950" font-family="monospace" font-size="9">Penny → 1</text>
+        <line x1="80" y1="50" x2="130" y2="55" stroke="#E44D26" stroke-width="1.5" marker-end="url(#arrowBr)"/>
+        <rect x="130" y="43" width="70" height="30" rx="4" fill="rgba(210,153,34,0.1)" stroke="#D29922" stroke-width="1"/><text x="165" y="63" text-anchor="middle" fill="#D29922" font-family="monospace" font-size="9">Nickel → 5</text>
+        <line x1="80" y1="70" x2="130" y2="80" stroke="#E44D26" stroke-width="1.5" marker-end="url(#arrowBr)"/>
+        <rect x="130" y="68" width="70" height="30" rx="4" fill="rgba(88,166,255,0.1)" stroke="#58A6FF" stroke-width="1"/><text x="165" y="88" text-anchor="middle" fill="#58A6FF" font-family="monospace" font-size="9">Dime → 10</text>
+        <line x1="80" y1="90" x2="130" y2="105" stroke="#E44D26" stroke-width="1.5" marker-end="url(#arrowBr)"/>
+        <rect x="130" y="95" width="70" height="30" rx="4" fill="rgba(219,97,162,0.1)" stroke="#DB61A2" stroke-width="1"/><text x="165" y="115" text-anchor="middle" fill="#DB61A2" font-family="monospace" font-size="9">Quarter → 25</text>
+        <text x="50" y="80" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="9">match</text>
+      </svg>`;
+    case 'generic':
+      return `<svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+        <text x="30" y="40" fill="#D2A8FF" font-family="monospace" font-size="12">fn largest&lt;</text>
+        <rect x="140" y="28" width="20" height="18" rx="3" fill="rgba(210,168,255,0.15)" stroke="#D2A8FF" stroke-width="1"/><text x="150" y="42" text-anchor="middle" fill="#D2A8FF" font-family="monospace" font-size="10">T</text>
+        <text x="165" y="40" fill="#D2A8FF" font-family="monospace" font-size="12">&gt;</text>
+        <rect x="30" y="55" width="50" height="22" rx="4" fill="rgba(228,77,38,0.1)" stroke="#E44D26" stroke-width="1"/><text x="55" y="70" text-anchor="middle" fill="#E44D26" font-family="monospace" font-size="9">i32</text>
+        <line x1="55" y1="77" x2="55" y2="95" stroke="#E44D26" stroke-width="1"/><rect x="25" y="95" width="60" height="25" rx="4" fill="rgba(228,77,38,0.08)" stroke="#E44D26" stroke-width="1" stroke-dasharray="3 2"/><text x="55" y="112" text-anchor="middle" fill="#E44D26" font-family="monospace" font-size="8">i32 版本</text>
+        <rect x="130" y="55" width="50" height="22" rx="4" fill="rgba(88,166,255,0.1)" stroke="#58A6FF" stroke-width="1"/><text x="155" y="70" text-anchor="middle" fill="#58A6FF" font-family="monospace" font-size="9">char</text>
+        <line x1="155" y1="77" x2="155" y2="95" stroke="#58A6FF" stroke-width="1"/><rect x="125" y="95" width="60" height="25" rx="4" fill="rgba(88,166,255,0.08)" stroke="#58A6FF" stroke-width="1" stroke-dasharray="3 2"/><text x="155" y="112" text-anchor="middle" fill="#58A6FF" font-family="monospace" font-size="8">char 版本</text>
+        <rect x="230" y="55" width="50" height="22" rx="4" fill="rgba(63,185,80,0.1)" stroke="#3FB950" stroke-width="1"/><text x="255" y="70" text-anchor="middle" fill="#3FB950" font-family="monospace" font-size="9">f64</text>
+        <line x1="255" y1="77" x2="255" y2="95" stroke="#3FB950" stroke-width="1"/><rect x="225" y="95" width="60" height="25" rx="4" fill="rgba(63,185,80,0.08)" stroke="#3FB950" stroke-width="1" stroke-dasharray="3 2"/><text x="255" y="112" text-anchor="middle" fill="#3FB950" font-family="monospace" font-size="8">f64 版本</text>
+        <text x="150" y="25" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="9">单态化 (Monomorphization)</text>
+      </svg>`;
+    case 'concurrency':
+      return `<svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="30" width="70" height="25" rx="4" fill="rgba(228,77,38,0.1)" stroke="#E44D26" stroke-width="1"/><text x="55" y="47" text-anchor="middle" fill="#E44D26" font-family="monospace" font-size="9">Thread 1</text>
+        <rect x="130" y="30" width="70" height="25" rx="4" fill="rgba(88,166,255,0.1)" stroke="#58A6FF" stroke-width="1"/><text x="165" y="47" text-anchor="middle" fill="#58A6FF" font-family="monospace" font-size="9">Thread 2</text>
+        <rect x="240" y="30" width="70" height="25" rx="4" fill="rgba(63,185,80,0.1)" stroke="#3FB950" stroke-width="1"/><text x="275" y="47" text-anchor="middle" fill="#3FB950" font-family="monospace" font-size="9">Thread 3</text>
+        <line x1="55" y1="55" x2="55" y2="85" stroke="#E44D26" stroke-width="1" stroke-dasharray="4 3">
+          <animate attributeName="y2" values="85;105;85" dur="2s" repeatCount="indefinite"/>
+        </line>
+        <line x1="165" y1="55" x2="165" y2="85" stroke="#58A6FF" stroke-width="1" stroke-dasharray="4 3">
+          <animate attributeName="y2" values="85;105;85" dur="2.3s" repeatCount="indefinite"/>
+        </line>
+        <line x1="275" y1="55" x2="275" y2="85" stroke="#3FB950" stroke-width="1" stroke-dasharray="4 3">
+          <animate attributeName="y2" values="85;105;85" dur="1.8s" repeatCount="indefinite"/>
+        </line>
+        <rect x="75" y="100" width="170" height="25" rx="4" fill="#1C2128" stroke="#30363D" stroke-width="1"/><text x="160" y="117" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="9">mpsc::channel() 消息传递</text>
+        <text x="160" y="25" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="9">并发执行 &amp; 消息传递</text>
+      </svg>`;
+    case 'trait':
+      return `<svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+        <rect x="30" y="20" width="100" height="35" rx="6" fill="rgba(210,168,255,0.12)" stroke="#D2A8FF" stroke-width="2"/><text x="80" y="42" text-anchor="middle" fill="#D2A8FF" font-family="monospace" font-size="11">Trait Summary</text>
+        <line x1="80" y1="55" x2="80" y2="75" stroke="#D2A8FF" stroke-width="1.5" stroke-dasharray="3 2"/>
+        <rect x="20" y="75" width="120" height="30" rx="5" fill="rgba(228,77,38,0.08)" stroke="#E44D26" stroke-width="1"/><text x="80" y="94" text-anchor="middle" fill="#E44D26" font-family="monospace" font-size="9">impl Summary for Article</text>
+        <rect x="170" y="20" width="120" height="30" rx="5" fill="rgba(228,77,38,0.08)" stroke="#E44D26" stroke-width="1"/><text x="230" y="40" text-anchor="middle" fill="#E44D26" font-family="monospace" font-size="9">impl Summary for Tweet</text>
+        <rect x="170" y="75" width="120" height="30" rx="5" fill="rgba(228,77,38,0.08)" stroke="#E44D26" stroke-width="1"/><text x="230" y="94" text-anchor="middle" fill="#E44D26" font-family="monospace" font-size="9">impl Summary for News</text>
+        <text x="160" y="125" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="9">fn notify(item: &impl Summary)</text>
+      </svg>`;
+    case 'macro':
+      return `<svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="30" width="90" height="30" rx="5" fill="rgba(240,136,62,0.12)" stroke="#F0883E" stroke-width="1.5"/><text x="65" y="50" text-anchor="middle" fill="#F0883E" font-family="monospace" font-size="10">macro_rules!</text>
+        <line x1="65" y1="60" x2="65" y2="80" stroke="#F0883E" stroke-width="1.5"/>
+        <rect x="15" y="80" width="100" height="25" rx="4" fill="#1C2128" stroke="#30363D" stroke-width="1"/><text x="65" y="97" text-anchor="middle" fill="#E6EDF3" font-family="monospace" font-size="9">模式匹配</text>
+        <line x1="110" y1="45" x2="180" y2="45" stroke="#F0883E" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrowBr)"/>
+        <rect x="185" y="25" width="110" height="40" rx="5" fill="rgba(63,185,80,0.1)" stroke="#3FB950" stroke-width="1"/><text x="240" y="40" text-anchor="middle" fill="#3FB950" font-family="monospace" font-size="9">代码生成</text><text x="240" y="55" text-anchor="middle" fill="#3FB950" font-family="monospace" font-size="8">TokenStream</text>
+        <text x="160" y="120" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="9">编译时展开 → 零运行时开销</text>
+      </svg>`;
+    case 'async':
+      return `<svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="35" width="80" height="30" rx="5" fill="rgba(57,210,192,0.1)" stroke="#39D2C0" stroke-width="1"/><text x="60" y="55" text-anchor="middle" fill="#39D2C0" font-family="monospace" font-size="10">async fn A</text>
+        <rect x="120" y="35" width="80" height="30" rx="5" fill="rgba(57,210,192,0.1)" stroke="#39D2C0" stroke-width="1"/><text x="160" y="55" text-anchor="middle" fill="#39D2C0" font-family="monospace" font-size="10">async fn B</text>
+        <rect x="220" y="35" width="80" height="30" rx="5" fill="rgba(57,210,192,0.1)" stroke="#39D2C0" stroke-width="1"/><text x="260" y="55" text-anchor="middle" fill="#39D2C0" font-family="monospace" font-size="10">async fn C</text>
+        <line x1="100" y1="50" x2="118" y2="50" stroke="#39D2C0" stroke-width="1.5"><animate attributeName="stroke-dashoffset" from="20" to="0" dur="1s" repeatCount="indefinite"/></line>
+        <line x1="200" y1="50" x2="218" y2="50" stroke="#39D2C0" stroke-width="1.5"><animate attributeName="stroke-dashoffset" from="20" to="0" dur="1s" repeatCount="indefinite"/></line>
+        <text x="60" y="65" text-anchor="middle" fill="#39D2C0" font-family="monospace" font-size="8">.await</text>
+        <text x="160" y="65" text-anchor="middle" fill="#39D2C0" font-family="monospace" font-size="8">.await</text>
+        <text x="260" y="65" text-anchor="middle" fill="#39D2C0" font-family="monospace" font-size="8">.await</text>
+        <rect x="80" y="85" width="160" height="25" rx="4" fill="#1C2128" stroke="#30363D" stroke-width="1"/><text x="160" y="102" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="9">Tokio Runtime 调度</text>
+        <text x="160" y="20" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="9">零成本异步抽象</text>
+      </svg>`;
+    default:
+      return `<svg viewBox="0 0 320 140"><text x="160" y="70" text-anchor="middle" fill="#8B949E" font-family="monospace">SVG Animation</text></svg>`;
+  }
+}
+
+function getConceptColor(difficulty) {
+  return difficulty === 'beginner' ? 'diff-beginner' : difficulty === 'intermediate' ? 'diff-intermediate' : 'diff-advanced';
+}
+function getDifficultyLabel(d) { return d === 'beginner' ? '入门' : d === 'intermediate' ? '进阶' : '高级'; }
+
+function renderConcepts() {
+  const grid = document.getElementById('conceptsGrid');
+  grid.innerHTML = concepts.map((c, i) => `
+    <div class="concept-card reveal" style="animation-delay:${i * 0.08}s" onclick="openConcept('${c.id}')"
+         onmousemove="handleCardHover(event, this)" onmouseleave="this.style.setProperty('--mouse-x','50%');this.style.setProperty('--mouse-y','50%')">
+      <div class="card-icon">${getConceptSVG(c.svgType)}</div>
+      <h3>${c.name}</h3>
+      <p>${c.desc}</p>
+      <span class="difficulty ${getConceptColor(c.difficulty)}">${getDifficultyLabel(c.difficulty)}</span>
+    </div>
+  `).join('');
+}
+
+function renderResources() {
+  const grid = document.getElementById('resourcesGrid');
+  grid.innerHTML = resources.map((r, i) => `
+    <a class="resource-card reveal" href="${r.url}" target="_blank" rel="noopener" style="animation-delay:${i * 0.08}s">
+      <div class="res-icon">${resourceIcons[r.icon]}</div>
+      <h3>${r.name}</h3>
+      <p>${r.desc}</p>
+      <span class="res-type">${r.type === 'official' ? '官方' : 'GitHub'}</span>
+    </a>
+  `).join('');
+}
+
+function handleCardHover(e, card) {
+  const rect = card.getBoundingClientRect();
+  card.style.setProperty('--mouse-x', ((e.clientX - rect.left) / rect.width * 100) + '%');
+  card.style.setProperty('--mouse-y', ((e.clientY - rect.top) / rect.height * 100) + '%');
+}
+
+function openConcept(id) {
+  const c = concepts.find(x => x.id === id);
+  if (!c) return;
+  const modal = document.getElementById('modal');
+  const content = document.getElementById('modalContent');
+  content.innerHTML = `
+    <button class="modal-close" onclick="closeModalDirect()">&times;</button>
+    <h2>${c.name}</h2>
+    <span class="difficulty ${getConceptColor(c.difficulty)} modal-difficulty">${getDifficultyLabel(c.difficulty)}</span>
+    <div class="modal-svg">${getConceptSVG(c.svgType)}</div>
+    <h4 style="font-family:var(--font-mono);font-size:0.85rem;color:var(--text-muted);margin-bottom:0.5rem;">代码示例</h4>
+    <pre>${escapeHtml(c.code)}</pre>
+    <h4 style="font-family:var(--font-mono);font-size:0.85rem;color:var(--text-muted);margin-bottom:0.5rem;">详细说明</h4>
+    <p class="explanation">${c.explanation}</p>
+  `;
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) { if (e.target === e.currentTarget) closeModalDirect(); }
+function closeModalDirect() {
+  document.getElementById('modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showStage(id) {
+  const stage = stages.find(s => s.id === id);
+  if (!stage) return;
+  document.querySelectorAll('.roadmap-node .node-circle').forEach(c => {
+    c.setAttribute('fill', '#1C2128');
+    c.setAttribute('stroke', '#E44D26');
+  });
+  const node = document.querySelector(`.roadmap-node[data-stage="${id}"] .node-circle`);
+  if (node) { node.setAttribute('fill', '#E44D26'); node.setAttribute('stroke', '#F06543'); }
+  const detail = document.getElementById('stageDetail');
+  detail.innerHTML = `
+    <div class="stage-detail-card">
+      <h3>阶段 ${stage.id}：${stage.title}</h3>
+      <p style="color:var(--text-secondary);">${stage.subtitle}</p>
+      <div class="stage-concepts">
+        ${stage.concepts.map(c => `<span class="concept-tag">${c}</span>`).join('')}
+      </div>
+    </div>
+  `;
+  detail.style.display = 'block';
+  detail.classList.add('active');
+  detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+const codeDemos = [
+  {
+    name:'所有权转移',
+    code:`<span class="kw">fn</span> <span class="fn">main</span>() {\n    <span class="kw">let</span> s1 = <span class="ty">String</span>::<span class="fn">from</span>(<span class="str">"hello"</span>);\n    <span class="kw">let</span> s2 = s1;  <span class="cm">// s1 所有权移动到 s2</span>\n    <span class="mac">println!</span>(<span class="str">"{}"</span>, s2);\n}`,
+    viz: function(step) {
+      if (step === 0) return `<rect x="30" y="60" width="120" height="50" rx="6" fill="#1C2128" stroke="#E44D26" stroke-width="2"/><text x="90" y="82" text-anchor="middle" fill="#E44D26" font-family="monospace" font-size="13">s1: "hello"</text><text x="90" y="100" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="10">Stack → Heap</text><text x="200" y="130" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="11">let s1 = String::from("hello");</text>`;
+      if (step === 1) return `<rect x="30" y="60" width="120" height="50" rx="6" fill="rgba(139,148,158,0.1)" stroke="#8B949E" stroke-width="1.5" stroke-dasharray="4 2" opacity="0.5"/><text x="90" y="82" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="13">s1: ❌ 失效</text><rect x="200" y="60" width="120" height="50" rx="6" fill="#1C2128" stroke="#58A6FF" stroke-width="2"/><text x="260" y="82" text-anchor="middle" fill="#58A6FF" font-family="monospace" font-size="13">s2: "hello"</text><line x1="150" y1="85" x2="195" y2="85" stroke="#E44D26" stroke-width="2" marker-end="url(#arrowOw2)"><animate attributeName="stroke-dashoffset" from="40" to="0" dur="1.5s" repeatCount="indefinite"/></line><text x="175" y="130" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="11">let s2 = s1; // 移动</text>`;
+    }
+  },
+  {
+    name:'借用引用',
+    code:`<span class="kw">fn</span> <span class="fn">main</span>() {\n    <span class="kw">let</span> s1 = <span class="ty">String</span>::<span class="fn">from</span>(<span class="str">"hello"</span>);\n    <span class="kw">let</span> len = <span class="fn">calc</span>(<span class="op">&amp;</span>s1);\n    <span class="mac">println!</span>(<span class="str">"{}: {}"</span>, s1, len);\n}`,
+    viz: function(step) {
+      if (step === 0) return `<rect x="30" y="60" width="140" height="50" rx="6" fill="#1C2128" stroke="#E44D26" stroke-width="2"/><text x="100" y="82" text-anchor="middle" fill="#E44D26" font-family="monospace" font-size="13">s1: "hello"</text><text x="100" y="100" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="10">所有者</text>`;
+      if (step === 1) return `<rect x="30" y="60" width="140" height="50" rx="6" fill="#1C2128" stroke="#E44D26" stroke-width="2"/><text x="100" y="82" text-anchor="middle" fill="#E44D26" font-family="monospace" font-size="13">s1: "hello"</text><rect x="220" y="70" width="100" height="35" rx="6" fill="rgba(88,166,255,0.1)" stroke="#58A6FF" stroke-width="1.5" stroke-dasharray="4 2"/><text x="270" y="92" text-anchor="middle" fill="#58A6FF" font-family="monospace" font-size="12">&s1</text><line x1="170" y1="85" x2="215" y2="85" stroke="#58A6FF" stroke-width="1.5" marker-end="url(#arrowOw2)" stroke-dasharray="4 3"><animate attributeName="stroke-dashoffset" from="40" to="0" dur="1.2s" repeatCount="indefinite"/></line><text x="175" y="120" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="11">只读借用, s1 仍可用</text>`;
+    }
+  },
+  {
+    name:'生命周期',
+    code:`<span class="kw">fn</span> <span class="fn">longest</span><<span class="ty">'a</span>>(x: <span class="op">&amp;</span><span class="ty">'a</span> <span class="kw">str</span>, y: <span class="op">&amp;</span><span class="ty">'a</span> <span class="kw">str</span>) -> <span class="op">&amp;</span><span class="ty">'a</span> <span class="kw">str</span> {\n    <span class="kw">if</span> x.<span class="fn">len</span>() > y.<span class="fn">len</span>() { x } <span class="kw">else</span> { y }\n}`,
+    viz: function(step) {
+      return `<svg viewBox="0 0 400 200"><line x1="40" y1="40" x2="360" y2="40" stroke="#30363D" stroke-width="1"/><text x="200" y="30" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="10">生命周期 'a</text><line x1="60" y1="40" x2="150" y2="40" stroke="#E44D26" stroke-width="3" stroke-linecap="round"/><text x="105" y="55" text-anchor="middle" fill="#E44D26" font-family="monospace" font-size="10">x 的存活范围</text><line x1="200" y1="40" x2="340" y2="40" stroke="#58A6FF" stroke-width="3" stroke-linecap="round"/><text x="270" y="55" text-anchor="middle" fill="#58A6FF" font-family="monospace" font-size="10">y 的存活范围</text><rect x="80" y="80" width="100" height="30" rx="5" fill="rgba(228,77,38,0.08)" stroke="#E44D26" stroke-width="1"/><text x="130" y="100" text-anchor="middle" fill="#E44D26" font-family="monospace" font-size="10">x: &'a str</text><rect x="220" y="80" width="100" height="30" rx="5" fill="rgba(88,166,255,0.08)" stroke="#58A6FF" stroke-width="1"/><text x="270" y="100" text-anchor="middle" fill="#58A6FF" font-family="monospace" font-size="10">y: &'a str</text><text x="200" y="155" text-anchor="middle" fill="#8B949E" font-family="monospace" font-size="11">返回值: &'a str (取二者较短的)</text></svg>`;
+    }
+  }
+];
+
+let currentDemo = 0;
+let currentStep = 0;
+function renderCodeDemo() {
+  const demo = codeDemos[currentDemo];
+  document.getElementById('codeContent').innerHTML = demo.code;
+  updateMemoryViz();
+  renderDemoControls();
+}
+
+function updateMemoryViz() {
+  const demo = codeDemos[currentDemo];
+  const svgContent = typeof demo.viz === 'function'
+    ? demo.viz(currentStep)
+    : `<text x="200" y="100" text-anchor="middle" fill="#8B949E" font-family="monospace">选择示例查看内存变化</text>`;
+  document.getElementById('memoryViz').innerHTML = `<defs><marker id="arrowOw2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#E44D26"/></marker></defs>${svgContent}`;
+}
+
+function renderDemoControls() {
+  const container = document.getElementById('demoControls');
+  container.innerHTML = codeDemos.map((d, i) =>
+    `<button class="demo-btn ${i === currentDemo ? 'active' : ''}" onclick="switchDemo(${i})">${d.name}</button>`
+  ).join('') + '<button class="demo-btn" onclick="toggleStep()">切换步骤</button>';
+}
+
+function switchDemo(i) {
+  currentDemo = i; currentStep = 0;
+  renderCodeDemo();
+}
+
+function toggleStep() {
+  const demo = codeDemos[currentDemo];
+  if (typeof demo.viz === 'function') {
+    currentStep = currentStep === 0 ? 1 : 0;
+    updateMemoryViz();
+  }
+}
+
+function typewriterEffect() {
+  const texts = [
+    '从零基础到高深，掌握系统级编程语言。',
+    '所有权、借用、生命周期 —— 编译器为你保驾护航。',
+    '零成本抽象， fearless concurrency。',
+    '参考 Rust 官方手册 & GitHub 学习仓库。'
+  ];
+  let textIdx = 0, charIdx = 0, isDeleting = false;
+  const el = document.getElementById('typewriter');
+  function tick() {
+    const current = texts[textIdx];
+    if (isDeleting) {
+      el.textContent = current.substring(0, charIdx - 1);
+      charIdx--;
+      if (charIdx === 0) { isDeleting = false; textIdx = (textIdx + 1) % texts.length; setTimeout(tick, 400); return; }
+    } else {
+      el.textContent = current.substring(0, charIdx + 1);
+      charIdx++;
+      if (charIdx === current.length) { setTimeout(() => { isDeleting = true; tick(); }, 2500); return; }
+    }
+    setTimeout(tick, isDeleting ? 30 : 60);
+  }
+  tick();
+}
+
+function handleScroll() {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  document.getElementById('progressBar').style.width = progress + '%';
+
+  document.querySelectorAll('.reveal').forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.85) el.classList.add('visible');
+  });
+
+  const sections = ['hero','roadmap','concepts','code-demo','resources'];
+  let current = 'hero';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.getBoundingClientRect().top <= 150) current = id;
+  });
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderConcepts();
+  renderResources();
+  renderCodeDemo();
+  typewriterEffect();
+  handleScroll();
+});
+
+window.addEventListener('scroll', handleScroll);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
+</script>
+</body>
+</html>
